@@ -1,0 +1,23 @@
+## AWS Provider details
+# provider_source = "hashicorp/aws"
+# provider_version = "~> 4.0"
+
+## AWS AUthenticaitons for default provider
+
+aws_access_key = "XXXXXXXXXXXXXXXXXXXXXX"
+aws_secret_key = "/YVXXXXXXXXXXXXXXXXXXXXXX2M"
+aws_region = "us-east-1"
+
+## Name of project for which we are creating all resources
+
+project_name = "terraformExample"
+
+## VPC Details to deploy instances
+
+vpc_id = "vpc-XXXXXXXXXXXXXXXXXXXXXX"
+
+## EC2 details 
+jobnav_instance_ami = "ami-XXXXXXXXXXXXXXXXXXXXXX" 
+number_of_instances = 1
+jobnav_instance_type = "t3a.medium"
+jobnav2022_key_name = "pemFileKeyPair"
