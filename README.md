@@ -1,2 +1,3 @@
-# terraform_treasures
-Dive into basic terraform scripts modules and methods.. We will work on various terraform ready to deploy shit here for common scenarios -- 
+# Terraform_treasures
+Dive into common terraform scripts modules and workflows.. We will work on terraform ready to deploy shit here for common scenarios -- 
+Give us most common scenarios that you think every one faces for cloud that requires automation. We will create scripts for that and push here for every one's use... 
