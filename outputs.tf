@@ -17,3 +17,12 @@ output "jobnav_db_internal_url" {
 output "jobnav_db_internal_master_db_name" {
   value = aws_db_instance.jobnav2022_db.name
 }
+# IAM user credentials output
+output "smtp_username" {
+  value = aws_iam_access_key.jobnav2022_ses_access_key.id
+}
+
+output "smtp_password" {
+  value     = aws_iam_access_key.jobnav2022_ses_access_key.ses_smtp_password_v4
+  sensitive = true
+}
