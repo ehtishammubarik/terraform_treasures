@@ -56,3 +56,8 @@ variable "jobnav2022_key_name" {
     type        = string 
     description = "Name of keyPair to be used to access instances of jobnav2022"
 }
+
+variable "ses_iam_policy" {
+    description = "Naame of ses IAM policy"
+    type        = string
+}
