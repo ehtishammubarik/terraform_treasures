@@ -1,5 +1,5 @@
 resource "aws_eip" "jobnav2022_eip_ngw" {
-  vpc = true
+  domain = "vpc"
   tags = {
     Name = "jobnav2022_eip_nat_gateway"
   }
