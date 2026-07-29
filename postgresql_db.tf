@@ -24,7 +24,7 @@ resource "aws_security_group_rule" "bastian_run" {
   from_port         = 5432
   to_port           = 5432
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  cidr_blocks       = var.db_allowed_cidrs
   security_group_id = aws_security_group.jobnav2022_db_security_group.id // Manually retrieved from AWS Console from security group created by eks
   description       = "bastion_host_jobnav2022_db_security_group_rule"
 }
@@ -37,16 +37,25 @@ resource "aws_db_instance" "jobnav2022_db" {
   instance_class          = "db.t3.small"
   engine                  = "postgres"
   engine_version          = "14"
-  username                = "jobnav"
-  password                = "***REMOVED***"
+  username                = var.db_username
+  password                = var.db_password
   publicly_accessible     = false
   vpc_security_group_ids  = [aws_security_group.jobnav2022_db_security_group.id]
   parameter_group_name    = "default.postgres14"
-  availability_zone       = "us-east-1a"
   port                    = 5432
-  skip_final_snapshot     = true
   backup_retention_period = 7
   copy_tags_to_snapshot   = true
+
+  # Data protection. Previously this instance could be destroyed with no
+  # snapshot, unencrypted, with nothing in the code to stop it.
+  storage_encrypted         = true
+  deletion_protection       = true
+  skip_final_snapshot       = false
+  final_snapshot_identifier = "${var.db_identifier}-final-${formatdate("YYYYMMDDhhmm", timestamp())}"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 # locals {
 #   timestamp = "${timestamp()}"

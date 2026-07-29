@@ -30,11 +30,11 @@ resource "aws_subnet" "jobnav2022_subnet_pvt_1c" {
   ]
 }
 resource "aws_subnet" "jobnav2022_subnet_pub_1a" {
-  vpc_id            = aws_vpc.jobnav2022_vpc.id
-  cidr_block        = "10.0.0.32/28"
-  availability_zone = "${var.aws_region}a"
+  vpc_id                                      = aws_vpc.jobnav2022_vpc.id
+  cidr_block                                  = "10.0.0.32/28"
+  availability_zone                           = "${var.aws_region}a"
   enable_resource_name_dns_a_record_on_launch = true
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch                     = true
   tags = {
     Name = "public-subnet-1a"
   }
@@ -43,11 +43,11 @@ resource "aws_subnet" "jobnav2022_subnet_pub_1a" {
   ]
 }
 resource "aws_subnet" "jobnav2022_subnet_pub_1c" {
-  vpc_id            = aws_vpc.jobnav2022_vpc.id
-  cidr_block        = "10.0.0.48/28"
-  availability_zone = "${var.aws_region}c"
+  vpc_id                                      = aws_vpc.jobnav2022_vpc.id
+  cidr_block                                  = "10.0.0.48/28"
+  availability_zone                           = "${var.aws_region}c"
   enable_resource_name_dns_a_record_on_launch = true
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch                     = true
   tags = {
     Name = "public-subnet-1a"
   }

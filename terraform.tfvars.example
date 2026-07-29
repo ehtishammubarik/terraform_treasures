@@ -1,23 +1,12 @@
-## AWS Provider details
-# provider_source = "hashicorp/aws"
-# provider_version = "~> 4.0"
-
-## AWS AUthenticaitons for default provider
-
-aws_access_key = "XXXXXXXXXXXXXXXXXXXXXX"
-aws_secret_key = "/YVXXXXXXXXXXXXXXXXXXXXXX2M"
 aws_region = "us-east-1"
 
-## Name of project for which we are creating all resources
+# Never 0.0.0.0/0. Both are validated and will fail at plan time.
+db_allowed_cidrs      = ["10.0.0.0/16"]
+bastion_allowed_cidrs = ["203.0.113.0/24"]   # your office or VPN range
 
-project_name = "terraformExample"
+db_username   = "app"
+db_identifier = "app-db"
 
-## VPC Details to deploy instances
-
-vpc_id = "vpc-XXXXXXXXXXXXXXXXXXXXXX"
-
-## EC2 details 
-jobnav_instance_ami = "ami-XXXXXXXXXXXXXXXXXXXXXX" 
-number_of_instances = 1
-jobnav_instance_type = "t3a.medium"
-jobnav2022_key_name = "pemFileKeyPair"
+# db_password is deliberately absent. Supply it at apply time:
+#   export TF_VAR_db_password=$(aws secretsmanager get-secret-value \
+#     --secret-id app/db --query SecretString --output text)
