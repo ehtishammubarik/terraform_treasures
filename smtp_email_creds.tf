@@ -17,7 +17,7 @@ resource "aws_iam_access_key" "jobnav2022_ses_access_key" {
 data "aws_iam_policy_document" "jobnav2022_ses_policy_document" {
   statement {
     actions   = ["ses:SendEmail", "ses:SendRawEmail"]
-    resources = [ "*" ]
+    resources = ["*"]
     //[data.aws_ses_email_identity.jobnav2022_email_identity.arn]
   }
 }
@@ -37,11 +37,11 @@ resource "aws_iam_policy" "jobnav2022_ses_policy" {
 resource "aws_iam_user_policy_attachment" "jobnav2022_ses_user_policy" {
   user       = aws_iam_user.jobnav2022_ses_iam.name
   policy_arn = aws_iam_policy.jobnav2022_ses_policy.arn
-  	
-#   provisioner "local-exec" {
-# 		command = "${local.aws_command}"
-#   }
-#   depends_on = [
-# 	  aws_ses_email_identity.jobnav2022_email_identity
-#   ]
+
+  #   provisioner "local-exec" {
+  # 		command = "${local.aws_command}"
+  #   }
+  #   depends_on = [
+  # 	  aws_ses_email_identity.jobnav2022_email_identity
+  #   ]
 }
