@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # Format and syntax. Cheap, so it runs first and blocks the rest.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive -diff
+
+      - name: terraform validate
+        run: |
+          # -backend=false so validation needs no credentials and no state.
+          # Every directory containing .tf files is validated independently,
+          # because a root module and a child module fail differently.
+          set -e
+          found=0
+          while IFS= read -r dir; do
+            found=1
+            echo "::group::validate $dir"
+            terraform -chdir="$dir" init -backend=false -input=false -no-color
+            terraform -chdir="$dir" validate -no-color
+            echo "::endgroup::"
+          done < <(find . -name '*.tf' -not -path './.git/*' -exec dirname {} \; | sort -u)
+          test "$found" -eq 1 || { echo "::error::no terraform found"; exit 1; }
+
+  # Secrets. This repo has shipped a database password before, so this gate is
+  # not theoretical.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # history too, not just the tip
+
+      - name: Credential patterns
+        run: |
+          set +e
+          fail=0
+          scan() {
+            out=$(grep -rInE "$1" --include='*.tf' --include='*.tfvars' --include='*.yml' . 2>/dev/null)
+            if [ -n "$out" ]; then
+              echo "::error::$2"
+              echo "$out" | sed -E 's/[A-Za-z0-9\/+=]{12,}/<REDACTED>/g' | head -5
+              fail=1
+            fi
+          }
+          scan 'AKIA[0-9A-Z]{16}'                              'AWS access key id'
+          scan '-----BEGIN [A-Z ]*PRIVATE KEY-----'            'private key'
+          scan '(password|secret|token)[[:space:]]*=[[:space:]]*"[^"$][^"]{5,}"' 'hardcoded credential'
+          exit $fail
+
+      - name: State and tfvars must never be tracked
+        run: |
+          bad=$(git ls-files | grep -E '\.tfstate|\.terraform/|^.*\.tfvars$' | grep -v '\.example$' || true)
+          if [ -n "$bad" ]; then echo "::error::tracked state or tfvars:"; echo "$bad"; exit 1; fi
+          echo "clean"
+
+  # Security posture. Advisory until the existing findings are cleared, then
+  # flipped to blocking. See docs/remediation.md.
+  scan:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          soft_fail: true
+          output_format: cli
+
+  # The plan is the change. Posted on the PR so the approval is of the plan.
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: Plan is not run without credentials
+        run: |
+          # Deliberately not wired to cloud credentials. A plan needs real
+          # access, and giving a fork PR that access is how supply-chain
+          # attacks on infrastructure repos work.
+          #
+          # Run the plan locally and paste it into the PR, per CLAUDE.md.
+          echo "::notice::Attach terraform plan output to this PR. See CLAUDE.md."
